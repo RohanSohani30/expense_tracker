@@ -1,0 +1,10 @@
+Script started on 2026-03-25 14:48:33+05:30 [COMMAND="timeout 15 /snap/bin/flutter --version" TERM="xterm-256color" TTY="/dev/pts/2" COLUMNS="31" LINES="10"]
+Initializing Flutter
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:02 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:03 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:04 --:--:--     0100  246k  100  246k    0     0  49561      0  0:00:05  0:00:05 --:--:-- 61445
+Downloading https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.41.5-stable.tar.xz
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0 1439M    0 77967    0     0  83476      0  5:01:27 --:--:--  5:01:27 83387  0 1439M    0  430k    0     0   245k      0  1:40:01  0:00:01  1:40:00  245k  0 1439M    0 2576k    0     0   938k      0  0:26:11  0:00:02  0:26:09  937k  0 1439M    0 8111k    0     0  2164k      0  0:11:21  0:00:03  0:11:18 2163k  1 1439M    1 15.7M    0     0  3386k      0  0:07:15  0:00:04  0:07:11 3385k  1 1439M    1 21.0M    0     0  3740k      0  0:06:34  0:00:05  0:06:29 4447k  1 1439M    1 28.7M    0     0  4353k      0  0:05:38  0:00:06  0:05:32 5792k  2 1439M    2 33.7M    0     0  4455k      0  0:05:30  0:00:07  0:05:23 6388k  2 1439M    2 37.6M    0     0  4412k      0  0:05:34  0:00:08  0:05:26 6098k
+Script done on 2026-03-25 14:48:48+05:30 [COMMAND_EXIT_CODE="124"]
