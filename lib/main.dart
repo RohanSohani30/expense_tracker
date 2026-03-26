@@ -83,25 +83,37 @@ class _ExpenseHomePageState extends State<ExpenseHomePage> {
     }
   }
 
-  void _stopListening() async {
-    await _speechToText.stop();
-    setState(() {});
-  }
-
   void _onSpeechResult(SpeechRecognitionResult result) async {
     setState(() {
       _lastWords = result.recognizedWords;
     });
 
     if (result.finalResult && _lastWords.isNotEmpty) {
-      final newExpense = ExpenseExtractor.extract(_lastWords);
-      setState(() {
-        _currentExpense = newExpense;
-      });
-      // Save to database
-      await DBHelper().insertExpense(newExpense);
-      _loadExpenses();
+      _processAndSaveExpense(_lastWords);
+      _lastWords = ''; // clear to avoid double save
     }
+  }
+
+  Future<void> _processAndSaveExpense(String text) async {
+    final newExpense = ExpenseExtractor.extract(text);
+    setState(() {
+      _currentExpense = newExpense;
+    });
+    try {
+      await DBHelper().insertExpense(newExpense);
+      await _loadExpenses();
+    } catch (e) {
+      debugPrint("Error saving to DB: $e");
+    }
+  }
+
+  void _stopListening() async {
+    await _speechToText.stop();
+    if (_lastWords.isNotEmpty) {
+      await _processAndSaveExpense(_lastWords);
+      _lastWords = ''; // clear to avoid double save
+    }
+    setState(() {});
   }
 
   @override
@@ -150,7 +162,12 @@ class _ExpenseHomePageState extends State<ExpenseHomePage> {
                   child: Column(
                     children: [
                       _buildDataRow('Amount', '\$${_currentExpense!.amount.toStringAsFixed(2)}', highlight: true),
+                      const SizedBox(height: 4),
                       _buildDataRow('Category', _currentExpense!.category),
+                      const SizedBox(height: 4),
+                      _buildDataRow('Date/Time', _dateFormat.format(_currentExpense!.date)),
+                      const SizedBox(height: 4),
+                      _buildDataRow('Description', _currentExpense!.description),
                     ],
                   ),
                 ),
@@ -167,56 +184,55 @@ class _ExpenseHomePageState extends State<ExpenseHomePage> {
             Expanded(
               child: _expensesList.isEmpty
                   ? const Center(child: Text("No expenses recorded yet."))
-                  : ListView.builder(
-                      itemCount: _expensesList.length,
-                      itemBuilder: (context, index) {
-                        final exp = _expensesList[index];
-                        return Card(
-                          margin: const EdgeInsets.symmetric(vertical: 4),
-                          child: ListTile(
-                            leading: CircleAvatar(
-                              backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-                              child: Icon(_getCategoryIcon(exp.category)),
-                            ),
-                            title: Text(exp.description, maxLines: 1, overflow: TextOverflow.ellipsis),
-                            subtitle: Text('${exp.category} • ${_dateFormat.format(exp.date)}'),
-                            trailing: Text(
-                              '\$${exp.amount.toStringAsFixed(2)}',
-                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                            ),
-                          ),
-                        );
-                      },
+                  : SingleChildScrollView(
+                      scrollDirection: Axis.vertical,
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: DataTable(
+                          headingTextStyle: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+                          columns: const [
+                            DataColumn(label: Text('Date / Time')),
+                            DataColumn(label: Text('Description')),
+                            DataColumn(label: Text('Category')),
+                            DataColumn(label: Text('Amount')),
+                          ],
+                          rows: _expensesList.map((exp) {
+                            return DataRow(cells: [
+                              DataCell(Text(_dateFormat.format(exp.date))),
+                              DataCell(Text(exp.description)),
+                              DataCell(Text(exp.category)),
+                              DataCell(
+                                Text(
+                                  '\$${exp.amount.toStringAsFixed(2)}',
+                                  style: const TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                            ]);
+                          }).toList(),
+                        ),
+                      ),
                     ),
             ),
           ],
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: GestureDetector(
-        onLongPress: _startListening,
-        onLongPressUp: _stopListening,
-        child: FloatingActionButton.large(
-          onPressed: _speechToText.isNotListening ? _startListening : _stopListening,
-          tooltip: 'Listen',
-          backgroundColor: _speechToText.isListening ? Colors.red : Theme.of(context).colorScheme.primary,
-          child: Icon(
-            _speechToText.isNotListening ? Icons.mic : Icons.mic_off,
-            color: Colors.white,
-          ),
+      floatingActionButton: FloatingActionButton.large(
+        onPressed: () {
+          if (_speechToText.isNotListening) {
+            _startListening();
+          } else {
+            _stopListening();
+          }
+        },
+        tooltip: 'Listen',
+        backgroundColor: _speechToText.isListening ? Colors.red : Theme.of(context).colorScheme.primary,
+        child: Icon(
+          _speechToText.isNotListening ? Icons.mic : Icons.mic_off,
+          color: Colors.white,
         ),
       ),
     );
-  }
-
-  IconData _getCategoryIcon(String category) {
-    switch (category) {
-      case 'Food': return Icons.fastfood;
-      case 'Travel': return Icons.flight;
-      case 'Shopping': return Icons.shopping_bag;
-      case 'Bills': return Icons.receipt;
-      default: return Icons.money;
-    }
   }
 
   Widget _buildDataRow(String label, String value, {bool highlight = false}) {
