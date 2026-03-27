@@ -2,12 +2,18 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import '../models/expense_model.dart';
 
+
 class DBHelper {
-  static final DBHelper _instance = DBHelper._internal();
-  factory DBHelper() => _instance;
-  DBHelper._internal();
+  static final DBHelper _instance = DBHelper._();
+
+  DBHelper._();
+
 
   static Database? _database;
+
+  factory DBHelper(){
+    return _instance;
+  }
 
   Future<Database> get database async {
     if (_database != null) return _database!;
