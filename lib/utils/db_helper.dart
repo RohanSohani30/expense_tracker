@@ -42,6 +42,7 @@ class DBHelper {
     ''');
   }
 
+
   Future<int> insertExpense(Expense expense) async {
     Database db = await database;
     return await db.insert(
